@@ -20,7 +20,7 @@ pipeline {
         }
         stage('Run Tests') {
             steps {
-                sh "python3 -m pytest --junitxml=reports/results.xml tests/"
+                sh "python3 -m pytest --junitxml=reports/results.xml -v tests/"
             }
         }
         
