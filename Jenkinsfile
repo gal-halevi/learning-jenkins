@@ -29,5 +29,19 @@ pipeline {
                 junit "reports/results.xml"
             }
         }
+
+        stage('Archive app') {
+            steps {
+                archiveArtifacts artifacts: '*.py', fingerprint: true, followSymlinks: false
+            }
+    }
+
+    post {
+        success {
+            echo "Build succeeded 🎉"
+        }
+        failure {
+            echo "Build failed ❌"
+        }
     }
 }
