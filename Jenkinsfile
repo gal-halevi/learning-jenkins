@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Checkout code') {
             steps {
-                git branch: 'main', url: 'https://github.com/gal-halevi/learning-jenkins.git'
+                git branch: 'level2', url: 'https://github.com/gal-halevi/learning-jenkins.git'
             }
         }
         stage('Install dependencies') {
