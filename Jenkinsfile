@@ -20,13 +20,14 @@ pipeline {
         }
         stage('Run Tests') {
             steps {
-                sh "python3 -m pytest --junitxml=reports/results.xml -v tests/"
+                sh """
+                mkdir -p reports
+                python3 -m pytest --junitxml=reports/results.xml -v tests/
+                """
             }
-        }
-        
-        stage('Publish report') {
-            steps {
-                junit "reports/results.xml"
+            post {
+                always {
+                    junit "reports/results.xml"
             }
         }
 
