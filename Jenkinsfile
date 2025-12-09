@@ -34,8 +34,8 @@ pipeline {
             steps {
                 archiveArtifacts artifacts: '*.py', fingerprint: true, followSymlinks: false
             }
+        }
     }
-
     post {
         success {
             echo "Build succeeded 🎉"
