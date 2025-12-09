@@ -1,5 +1,10 @@
 pipeline {
-    agent { label 'docker' }
+    agent {
+        docker {
+            image 'python:3.12'
+            label 'docker'
+        }
+    }
 
     stages {
         stage('Checkout code') {
