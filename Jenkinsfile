@@ -3,6 +3,7 @@ pipeline {
         docker {
             image 'python:3.12'
             label 'docker'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
         }
     }
 
