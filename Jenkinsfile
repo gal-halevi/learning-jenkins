@@ -28,6 +28,7 @@ pipeline {
             post {
                 always {
                     junit "reports/results.xml"
+                }
             }
         }
 
