@@ -1,33 +1,28 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.12'
-            label 'docker'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
+    agent none
 
     environment {
         DOCKER_IMAGE = 'galhalevi/calculator'
     }   
 
     stages {
-        stage('Checkout code') {
+        stage('Test in Python container') {
+            agent {
+                docker {
+                    image 'python:3.12-slim'
+                    label 'docker'
+                }
+            }
             steps {
                 git branch: 'level2', url: 'https://github.com/gal-halevi/learning-jenkins.git'
-            }
-        }
-        stage('Install dependencies') {
-            steps {
+
                 sh "python3 -m pip install -r requirements.txt"
-            }
-        }
-        stage('Run Tests') {
-            steps {
-                sh """
-                mkdir -p reports
-                python3 -m pytest --junitxml=reports/results.xml -v tests/
-                """
+                sh "mkdir -p reports"
+                sh "python3 -m pytest --junitxml=reports/results.xml -v tests/"
+                stash name: 'src', includes: '''
+                *.py, 
+                Dockerfile
+                '''
             }
             post {
                 always {
@@ -39,6 +34,7 @@ pipeline {
         stage('Build & Push Docker Image') {
             agent { label 'docker' }
             steps {
+                unstash 'src'
                 script {
                     if (!env.GIT_COMMIT) {
                         error("Missing GIT_COMMIT — cannot tag Docker image.")
@@ -52,7 +48,7 @@ pipeline {
 
                     echo "Using commit tag=${shortCommit}, build tag=${buildTag}"
 
-                    def img = docker.build("${DOCKER_IMAGE}:${shortCommit}")
+                    def img = docker.build("${env.DOCKER_IMAGE}:${shortCommit}")
 
                     docker.withRegistry('', 'dockerhub-creds') {
                         img.push(shortCommit)
@@ -64,7 +60,9 @@ pipeline {
         }
 
         stage('Archive app') {
+            agent { label 'docker' }
             steps {
+                unstash 'src'
                 archiveArtifacts artifacts: '*.py', fingerprint: true, followSymlinks: false
             }
         }
