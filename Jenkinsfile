@@ -32,6 +32,30 @@ pipeline {
             }
         }
 
+        stage('Build & Push Docker Image') {
+            script {
+                if (!env.GIT_COMMIT) {
+                    error("Missing GIT_COMMIT — cannot tag Docker image.")
+                }
+                if (!env.BUILD_NUMBER) {
+                    error("Missing BUILD_NUMBER — cannot tag Docker image.")
+                } 
+                def shortCommit = env.GIT_COMMIT.take(7)
+                def buildTag = env.BUILD_NUMBER
+                def latestTag = 'latest'
+
+                echo "Using commit tag=${shortCommit}, build tag=${buildTag}"
+
+                def img = docker.build("${DOCKER_IMAGE}:${shortCommit}")
+
+                docker.withRegistry('', 'dockerhub-creds') {
+                    img.push(shortCommit)
+                    img.push(buildTag)
+                    img.push(latestTag)
+                }    
+            }
+        }
+
         stage('Archive app') {
             steps {
                 archiveArtifacts artifacts: '*.py', fingerprint: true, followSymlinks: false
