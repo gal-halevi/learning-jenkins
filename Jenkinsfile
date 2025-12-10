@@ -37,6 +37,7 @@ pipeline {
         }
 
         stage('Build & Push Docker Image') {
+            agent { label 'docker' }
             steps {
                 script {
                     if (!env.GIT_COMMIT) {
