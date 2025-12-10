@@ -3,7 +3,12 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'galhalevi/calculator'
-    }   
+    }
+
+    options {
+        timestamps()
+        timeout(time: 20, unit: 'MINUTES')
+    }
 
     stages {
         stage('Test in Python container') {
