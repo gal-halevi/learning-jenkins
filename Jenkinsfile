@@ -23,7 +23,7 @@ pipeline {
 
                 sh "python3 -m pip install -r requirements-dev.txt"
                 sh "mkdir -p reports"
-                sh "ruff check . --format junit-xml --output reports/ruff.xml"
+                sh "python3 -m ruff check . --output-format junit --output-file reports/ruff.xml"
                 sh "python3 -m pytest --junitxml=reports/pytest.xml -v tests/"
                 stash name: 'src', includes: '''
                 *.py, 
