@@ -7,6 +7,10 @@ pipeline {
         }
     }
 
+    environment {
+        DOCKER_IMAGE = 'galhalevi/calculator'
+    }   
+
     stages {
         stage('Checkout code') {
             steps {
