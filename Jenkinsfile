@@ -19,33 +19,34 @@ pipeline {
                         values '3.10', '3.11', '3.12'
                     }
                 }
-            }
-            agent {
-                docker {
-                    image "python:${PYTHON_VERSION}-slim"
-                    label 'docker'
-                }
-            }
-            stages {
-                stage('Checkout code') {
-                    steps {
-                        git branch: 'level3', url: 'https://github.com/gal-halevi/learning-jenkins.git'
+    
+                agent {
+                    docker {
+                        image "python:${PYTHON_VERSION}-slim"
+                        label 'docker'
                     }
                 }
+                stages {
+                    stage('Checkout code') {
+                        steps {
+                            git branch: 'level3', url: 'https://github.com/gal-halevi/learning-jenkins.git'
+                        }
+                    }
 
-                stage('Run Tests') {
-                    steps {
-                        sh "mkdir -p reports"
-                        sh "python -m pip install -r requirements-dev.txt"
-                        sh "python -m ruff check . --output-format junit --output-file reports/ruff.xml"
-                        sh "python -m pytest --junitxml=reports/pytest.xml -v tests/"
+                    stage('Run Tests') {
+                        steps {
+                            sh "mkdir -p reports"
+                            sh "python -m pip install -r requirements-dev.txt"
+                            sh "python -m ruff check . --output-format junit --output-file reports/ruff.xml"
+                            sh "python -m pytest --junitxml=reports/pytest.xml -v tests/"
+                        }
                     }
                 }
-            }
-            post {
-                always {
-                    junit "reports/ruff.xml"
-                    junit "reports/pytest.xml"
+                post {
+                    always {
+                        junit "reports/ruff.xml"
+                        junit "reports/pytest.xml"
+                    }
                 }
             }
         }
