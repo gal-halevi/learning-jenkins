@@ -25,10 +25,8 @@ pipeline {
                 sh "mkdir -p reports"
                 sh "python3 -m ruff check . --output-format junit --output-file reports/ruff.xml"
                 sh "python3 -m pytest --junitxml=reports/pytest.xml -v tests/"
-                stash name: 'src', includes: '''
-                    *.py
-                    Dockerfile
-                '''
+                stash name: 'src', includes: '*.py, Dockerfile'
+
             }
             post {
                 always {
