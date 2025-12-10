@@ -23,7 +23,8 @@ pipeline {
 
                 sh "python3 -m pip install -r requirements-dev.txt"
                 sh "mkdir -p reports"
-                sh "python3 -m pytest --junitxml=reports/results.xml -v tests/"
+                sh "ruff check . --format junit-xml --output reports/ruff.xml"
+                sh "python3 -m pytest --junitxml=reports/pytest.xml -v tests/"
                 stash name: 'src', includes: '''
                 *.py, 
                 Dockerfile
@@ -31,7 +32,8 @@ pipeline {
             }
             post {
                 always {
-                    junit "reports/results.xml"
+                    junit "reports/ruff.xml"
+                    junit "reports/pytest.xml"
                 }
             }
         }
