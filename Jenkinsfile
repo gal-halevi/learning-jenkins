@@ -29,7 +29,7 @@ pipeline {
             stages {
                 stage('Checkout code') {
                     steps {
-                        git branch: 'main', url: 'https://github.com/gal-halevi/learning-jenkins.git'
+                        git branch: 'level3', url: 'https://github.com/gal-halevi/learning-jenkins.git'
                     }
                 }
 
@@ -52,11 +52,11 @@ pipeline {
 
         stage('Build & Push Docker Image') {
             when {
-                branch 'main'
+                branch 'level3'
             }
             agent { label 'docker' }
             steps {
-                git branch: 'main', url: 'https://github.com/gal-halevi/learning-jenkins.git'
+                git branch: 'level3', url: 'https://github.com/gal-halevi/learning-jenkins.git'
                 script {
                     if (!env.GIT_COMMIT) {
                         error("Missing GIT_COMMIT — cannot tag Docker image.")
