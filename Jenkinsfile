@@ -11,22 +11,36 @@ pipeline {
     }
 
     stages {
-        stage('Test in Python container') {
+        stage('Python Compatibility Test') {
+            matrix {
+                axes {
+                    axis {
+                        name 'PYTHON_VERSION'
+                        values '3.10', '3.11', '3.12'
+                    }
+                }
+            }
             agent {
                 docker {
-                    image 'python:3.12-slim'
+                    image "python:${PYTHON_VERSION}-slim"
                     label 'docker'
                 }
             }
-            steps {
-                git branch: 'main', url: 'https://github.com/gal-halevi/learning-jenkins.git'
+            stages {
+                stage('Checkout code') {
+                    steps {
+                        git branch: 'main', url: 'https://github.com/gal-halevi/learning-jenkins.git'
+                    }
+                }
 
-                sh "python3 -m pip install -r requirements-dev.txt"
-                sh "mkdir -p reports"
-                sh "python3 -m ruff check . --output-format junit --output-file reports/ruff.xml"
-                sh "python3 -m pytest --junitxml=reports/pytest.xml -v tests/"
-                stash name: 'src', includes: '*.py, Dockerfile'
-
+                stage('Run Tests') {
+                    steps {
+                        sh "mkdir -p reports"
+                        sh "python -m pip install -r requirements-dev.txt"
+                        sh "python -m ruff check . --output-format junit --output-file reports/ruff.xml"
+                        sh "python -m pytest --junitxml=reports/pytest.xml -v tests/"
+                    }
+                }
             }
             post {
                 always {
@@ -42,7 +56,7 @@ pipeline {
             }
             agent { label 'docker' }
             steps {
-                unstash 'src'
+                git branch: 'main', url: 'https://github.com/gal-halevi/learning-jenkins.git'
                 script {
                     if (!env.GIT_COMMIT) {
                         error("Missing GIT_COMMIT — cannot tag Docker image.")
@@ -64,14 +78,6 @@ pipeline {
                         img.push(latestTag)
                     }    
                 }
-            }
-        }
-
-        stage('Archive app') {
-            agent { label 'docker' }
-            steps {
-                unstash 'src'
-                archiveArtifacts artifacts: '*.py', fingerprint: true, followSymlinks: false
             }
         }
     }
