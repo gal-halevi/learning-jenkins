@@ -21,7 +21,7 @@ pipeline {
             steps {
                 git branch: 'level2', url: 'https://github.com/gal-halevi/learning-jenkins.git'
 
-                sh "python3 -m pip install -r requirements.txt"
+                sh "python3 -m pip install -r requirements-dev.txt"
                 sh "mkdir -p reports"
                 sh "python3 -m pytest --junitxml=reports/results.xml -v tests/"
                 stash name: 'src', includes: '''
