@@ -39,6 +39,9 @@ pipeline {
         }
 
         stage('Build & Push Docker Image') {
+            when {
+                branch 'level2'
+            }
             agent { label 'docker' }
             steps {
                 unstash 'src'
