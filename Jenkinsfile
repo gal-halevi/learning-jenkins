@@ -19,7 +19,7 @@ pipeline {
                 }
             }
             steps {
-                git branch: 'level2', url: 'https://github.com/gal-halevi/learning-jenkins.git'
+                git branch: 'main', url: 'https://github.com/gal-halevi/learning-jenkins.git'
 
                 sh "python3 -m pip install -r requirements-dev.txt"
                 sh "mkdir -p reports"
@@ -38,7 +38,7 @@ pipeline {
 
         stage('Build & Push Docker Image') {
             when {
-                branch 'level2'
+                branch 'main'
             }
             agent { label 'docker' }
             steps {
