@@ -53,7 +53,10 @@ pipeline {
 
         stage('Build & Push Docker Image') {
             when {
-                branch 'level3'
+                anyOf {
+                    branch 'main'
+                    branch 'level3'  // while debug
+                }
             }
             agent { label 'docker' }
             steps {
