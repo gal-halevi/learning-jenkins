@@ -38,7 +38,10 @@ pipeline {
                             sh "mkdir -p reports"
                             sh "python -m pip install -r requirements-dev.txt"
                             sh "python -m ruff check . --output-format junit --output-file reports/ruff-${PYTHON_VERSION}.xml"
-                            sh "python -m pytest --junitxml=reports/pytest-${PYTHON_VERSION}.xml -v tests/"
+                            sh "python -m pytest \
+                                --junitxml=reports/pytest-${PYTHON_VERSION}.xml \
+                                -o junit_suite_name=pytest-py${PYTHON_VERSION} \
+                                -v tests/"
                         }
                     }
                 }
