@@ -68,11 +68,9 @@ pipeline {
                             if (env.PYTHON_VERSION == '3.12') {
                                 junit "reports/ruff-${PYTHON_VERSION}.xml"
                                 
-                                publishCoverage(
-                                    adapters: [
-                                        coberturaAdapter('reports/coverage.xml')
-                                    ],
-                                    sourceFileResolver: sourceFiles('STORE_LAST_BUILD'),
+                                recordCoverage(
+                                    tools: [[parser: 'COBERTURA', pattern: 'reports/coverage.xml']],
+                                    sourceCodeRetention: 'LAST_BUILD',
                                     failNoReports: true
                                 )
                             }
