@@ -3,6 +3,8 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'galhalevi/calculator'
+        PIP_CACHE_DIR = "${WORKSPACE}/.pip-cache"
+        PIP_DISABLE_PIP_VERSION_CHECK = "1"
     }
 
     options {
