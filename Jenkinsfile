@@ -86,21 +86,22 @@ pipeline {
             }
             agent { label 'docker' }
             steps {
-                git branch: 'level3', url: 'https://github.com/gal-halevi/learning-jenkins.git'
+                checkout scm
+
                 script {
-                    if (!env.GIT_COMMIT) {
-                        error("Missing GIT_COMMIT — cannot tag Docker image.")
-                    }
-                    if (!env.BUILD_NUMBER) {
-                        error("Missing BUILD_NUMBER — cannot tag Docker image.")
-                    } 
                     def shortCommit = env.GIT_COMMIT.take(7)
                     def buildTag = env.BUILD_NUMBER
                     def latestTag = 'latest'
 
-                    echo "Using commit tag=${shortCommit}, build tag=${buildTag}"
+                    def imageRef = "${env.DOCKER_IMAGE}:${shortCommit}"
+                    def img = docker.build(imageRef)
 
-                    def img = docker.build("${env.DOCKER_IMAGE}:${shortCommit}")
+                    sh """
+                        set -eu
+                        out=\$(docker run --rm ${imageRef})
+                        echo "\$out"
+                        echo "\$out" | grep -F "2 + 3 = 5"
+                    """
 
                     docker.withRegistry('', 'dockerhub-creds') {
                         img.push(shortCommit)
