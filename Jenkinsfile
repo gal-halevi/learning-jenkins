@@ -91,11 +91,11 @@ pipeline {
                 checkout scm
 
                 script {
-                    def shortCommit = env.GIT_COMMIT.take(7)
-                    def buildTag = env.BUILD_NUMBER
+                    def shaTag = "sha-${env.GIT_COMMIT.take(7)}"
+                    def branchBuild = "${env.BRANCH_NAME}-b${env.BUILD_NUMBER}"
                     def latestTag = 'latest'
 
-                    def imageRef = "${env.DOCKER_IMAGE}:${shortCommit}"
+                    def imageRef = "${env.DOCKER_IMAGE}:${shaTag}"
                     def img = docker.build(imageRef)
 
                     sh """
@@ -106,8 +106,8 @@ pipeline {
                     """
 
                     docker.withRegistry('', 'dockerhub-creds') {
-                        img.push(shortCommit)
-                        img.push(buildTag)
+                        img.push(shaTag)
+                        img.push(branchBuild)
                         img.push(latestTag)
                     }    
                 }
