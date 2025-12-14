@@ -81,9 +81,9 @@ pipeline {
         }
 
         stage('Build & Push Docker Image') {
-            // when {
-            //     branch 'main'
-            // }
+            when {
+                branch 'main'
+            }
             agent { label 'docker' }
             steps {
                 checkout scm
