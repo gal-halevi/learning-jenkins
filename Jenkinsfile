@@ -35,20 +35,40 @@ pipeline {
 
                     stage('Run Tests') {
                         steps {
-                            sh "mkdir -p reports"
-                            sh "python -m pip install -r requirements-dev.txt"
-                            sh "python -m ruff check . --output-format junit --output-file reports/ruff-${PYTHON_VERSION}.xml"
-                            sh "python -m pytest \
-                                --junitxml=reports/pytest-${PYTHON_VERSION}.xml \
-                                -o junit_suite_name=pytest-py${PYTHON_VERSION} \
-                                -v tests/"
+                            sh """
+                                set -eu
+                                mkdir -p reports
+                                python -m pip install -r requirements-dev.txt
+                                if [ "${PYTHON_VERSION}" = "3.12" ]; then
+                                    echo "Running ruff + mypy + coverage (only on Python ${PYTHON_VERSION})"
+                                    python -m ruff check . --output-format junit --output-file reports/ruff-${PYTHON_VERSION}.xml
+                                    python -m mypy calculator
+                                    python -m pytest \\
+                                        --junitxml=reports/pytest-${PYTHON_VERSION}.xml \\
+                                        -o junit_suite_name=pytest-py${PYTHON_VERSION} \\
+                                        --cov \\
+                                        --cov-report=xml:reports/coverage.xml \\
+                                        --cov-fail-under=85 \\
+                                        -v tests/
+                                else
+                                    echo "Running pytest only (Python ${PYTHON_VERSION})"
+                                    python -m pytest \\
+                                    --junitxml=reports/pytest-${PYTHON_VERSION}.xml \\
+                                    -o junit_suite_name=pytest-py${PYTHON_VERSION} \\
+                                    -v tests/
+                                fi
+                            """
                         }
                     }
                 }
                 post {
                     always {
-                        junit "reports/ruff-${PYTHON_VERSION}.xml"
-                        junit "reports/pytest-${PYTHON_VERSION}.xml"
+                        script {
+                            junit "reports/pytest-${PYTHON_VERSION}.xml"
+                            if (env.PYTHON_VERSION == '3.12') {
+                                junit "reports/ruff-${PYTHON_VERSION}.xml"
+                            }
+                        }
                     }
                 }
             }
