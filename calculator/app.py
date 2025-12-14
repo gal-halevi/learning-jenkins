@@ -1,4 +1,4 @@
-from calculator import add
+from .calculator import add
 
 
 def hello(name: str) -> str:
