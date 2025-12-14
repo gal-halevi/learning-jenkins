@@ -45,6 +45,7 @@ pipeline {
                                     python -m mypy calculator
                                     python -m pytest \\
                                         --junitxml=reports/pytest-${PYTHON_VERSION}.xml \\
+                                        --junit-prefix=py${PYTHON_VERSION} \\
                                         -o junit_suite_name=pytest-py${PYTHON_VERSION} \\
                                         --cov \\
                                         --cov-report=xml:reports/coverage.xml \\
@@ -54,6 +55,7 @@ pipeline {
                                     echo "Running pytest only (Python ${PYTHON_VERSION})"
                                     python -m pytest \\
                                     --junitxml=reports/pytest-${PYTHON_VERSION}.xml \\
+                                    --junit-prefix=py${PYTHON_VERSION} \\
                                     -o junit_suite_name=pytest-py${PYTHON_VERSION} \\
                                     -v tests/
                                 fi
