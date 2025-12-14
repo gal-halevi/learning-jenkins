@@ -11,27 +11,73 @@ pipeline {
     }
 
     stages {
-        stage('Test in Python container') {
-            agent {
-                docker {
-                    image 'python:3.12-slim'
-                    label 'docker'
+        stage('Python Compatibility Test') {
+            matrix {
+                axes {
+                    axis {
+                        name 'PYTHON_VERSION'
+                        values '3.10', '3.11', '3.12'
+                    }
                 }
-            }
-            steps {
-                git branch: 'main', url: 'https://github.com/gal-halevi/learning-jenkins.git'
+    
+                agent {
+                    docker {
+                        image "python:${PYTHON_VERSION}-slim"
+                        label 'docker'
+                    }
+                }
+                stages {
+                    stage('Checkout code') {
+                        steps {
+                            checkout scm
+                        }
+                    }
 
-                sh "python3 -m pip install -r requirements-dev.txt"
-                sh "mkdir -p reports"
-                sh "python3 -m ruff check . --output-format junit --output-file reports/ruff.xml"
-                sh "python3 -m pytest --junitxml=reports/pytest.xml -v tests/"
-                stash name: 'src', includes: '*.py, Dockerfile'
-
-            }
-            post {
-                always {
-                    junit "reports/ruff.xml"
-                    junit "reports/pytest.xml"
+                    stage('Run Tests') {
+                        steps {
+                            sh """
+                                set -eu
+                                mkdir -p reports
+                                python -m pip install -r requirements-dev.txt
+                                if [ "${PYTHON_VERSION}" = "3.12" ]; then
+                                    echo "Running ruff + mypy + coverage (only on Python ${PYTHON_VERSION})"
+                                    python -m ruff check . --output-format junit --output-file reports/ruff-${PYTHON_VERSION}.xml
+                                    python -m mypy calculator
+                                    python -m pytest \\
+                                        --junitxml=reports/pytest-${PYTHON_VERSION}.xml \\
+                                        --junit-prefix=py${PYTHON_VERSION} \\
+                                        -o junit_suite_name=pytest-py${PYTHON_VERSION} \\
+                                        --cov \\
+                                        --cov-report=xml:reports/coverage.xml \\
+                                        --cov-fail-under=85 \\
+                                        -v tests/
+                                else
+                                    echo "Running pytest only (Python ${PYTHON_VERSION})"
+                                    python -m pytest \\
+                                    --junitxml=reports/pytest-${PYTHON_VERSION}.xml \\
+                                    --junit-prefix=py${PYTHON_VERSION} \\
+                                    -o junit_suite_name=pytest-py${PYTHON_VERSION} \\
+                                    -v tests/
+                                fi
+                            """
+                        }
+                    }
+                }
+                post {
+                    always {
+                        junit "reports/pytest-${PYTHON_VERSION}.xml"
+                        script {
+                            if (env.PYTHON_VERSION == '3.12') {
+                                junit "reports/ruff-${PYTHON_VERSION}.xml"
+                                
+                                recordCoverage(
+                                    tools: [[parser: 'COBERTURA', pattern: 'reports/coverage.xml']],
+                                    sourceCodeRetention: 'LAST_BUILD',
+                                    failNoReports: true
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -42,36 +88,29 @@ pipeline {
             }
             agent { label 'docker' }
             steps {
-                unstash 'src'
+                checkout scm
+
                 script {
-                    if (!env.GIT_COMMIT) {
-                        error("Missing GIT_COMMIT — cannot tag Docker image.")
-                    }
-                    if (!env.BUILD_NUMBER) {
-                        error("Missing BUILD_NUMBER — cannot tag Docker image.")
-                    } 
-                    def shortCommit = env.GIT_COMMIT.take(7)
-                    def buildTag = env.BUILD_NUMBER
+                    def shaTag = "sha-${env.GIT_COMMIT.take(7)}"
+                    def branchBuild = "${env.BRANCH_NAME}-b${env.BUILD_NUMBER}"
                     def latestTag = 'latest'
 
-                    echo "Using commit tag=${shortCommit}, build tag=${buildTag}"
+                    def imageRef = "${env.DOCKER_IMAGE}:${shaTag}"
+                    def img = docker.build(imageRef)
 
-                    def img = docker.build("${env.DOCKER_IMAGE}:${shortCommit}")
+                    sh """
+                        set -eu
+                        out=\$(docker run --rm ${imageRef})
+                        echo "\$out"
+                        echo "\$out" | grep -F "2 + 3 = 5"
+                    """
 
                     docker.withRegistry('', 'dockerhub-creds') {
-                        img.push(shortCommit)
-                        img.push(buildTag)
+                        img.push(shaTag)
+                        img.push(branchBuild)
                         img.push(latestTag)
                     }    
                 }
-            }
-        }
-
-        stage('Archive app') {
-            agent { label 'docker' }
-            steps {
-                unstash 'src'
-                archiveArtifacts artifacts: '*.py', fingerprint: true, followSymlinks: false
             }
         }
     }
