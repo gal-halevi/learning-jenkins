@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE = 'galhalevi/calculator'
         PIP_CACHE_DIR = "${WORKSPACE}/.pip-cache"
-        PIP_DISABLE_PIP_VERSION_CHECK = "1"
+        PIP_DISABLE_PIP_VERSION_CHECK=1
     }
 
     options {
@@ -41,6 +41,7 @@ pipeline {
                             sh """
                                 set -eu
                                 mkdir -p reports
+                                python -m pip install -U pip
                                 python -m pip install -r requirements-dev.txt
                                 if [ "${PYTHON_VERSION}" = "3.12" ]; then
                                     echo "Running ruff + mypy + coverage (only on Python ${PYTHON_VERSION})"
