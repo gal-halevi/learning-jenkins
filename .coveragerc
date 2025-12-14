@@ -1,0 +1,6 @@
+[run]
+source = calculator
+
+
+
+fail_under = 85
