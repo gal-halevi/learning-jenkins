@@ -1,6 +1,8 @@
 [run]
 source = calculator
 
-
+[report]
+exclude_lines =
+    if __name__ == .__main__.:
 
 fail_under = 85
