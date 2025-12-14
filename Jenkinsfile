@@ -29,7 +29,7 @@ pipeline {
                 stages {
                     stage('Checkout code') {
                         steps {
-                            git branch: 'level3', url: 'https://github.com/gal-halevi/learning-jenkins.git'
+                            checkout scm
                         }
                     }
 
