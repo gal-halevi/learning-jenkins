@@ -27,13 +27,13 @@ pipeline {
                     }
                 }
                 stages {
-                    stage('Checkout (${PYTHON_VERSION})') {
+                    stage("Checkout (${PYTHON_VERSION})") {
                         steps {
                             checkout scm
                         }
                     }
 
-                    stage('(${PYTHON_VERSION})') {
+                    stage("Test (${PYTHON_VERSION})") {
                         steps {
                             sh """
                                 set -eu
