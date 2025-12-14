@@ -65,8 +65,8 @@ pipeline {
                 }
                 post {
                     always {
+                        junit "reports/pytest-${PYTHON_VERSION}.xml"
                         script {
-                            junit "reports/pytest-${PYTHON_VERSION}.xml"
                             if (env.PYTHON_VERSION == '3.12') {
                                 junit "reports/ruff-${PYTHON_VERSION}.xml"
                                 
