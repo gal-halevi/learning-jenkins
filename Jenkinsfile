@@ -104,9 +104,9 @@ pipeline {
 
                     sh """
                         set -eu
-                        out=\$(docker run --rm ${imageRef})
+                        out=\$(docker run --rm ${imageRef} add 2 3)
                         echo "\$out"
-                        echo "\$out" | grep -F "2 + 3 = 5"
+                        echo "\$out" | grep -F "5.0"
                     """
 
                     docker.withRegistry('', 'dockerhub-creds') {
