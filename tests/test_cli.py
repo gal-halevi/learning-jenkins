@@ -44,7 +44,7 @@ def run_cli(*args: str):
     )
 
 
-def test_cli_add():
+def test_cli_add_subprocess():
     p = run_cli("add", "2", "3")
     assert p.returncode == 0
     assert p.stdout.strip() == "5.0"
