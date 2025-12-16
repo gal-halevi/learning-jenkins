@@ -22,7 +22,11 @@ def mul(a: float, b: float) -> None:
 
 @app.command()
 def div(a: float, b: float) -> None:
-    typer.echo(divide(a, b))
+    try:
+        typer.echo(divide(a, b))
+    except ValueError as e:
+        typer.echo(f"error: {e}", err=True)
+        raise typer.Exit(code=2)
 
 
 def main() -> None:
