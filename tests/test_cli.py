@@ -32,10 +32,8 @@ def test_cli_div():
 
 def test_cli_div_by_zero():
     r = runner.invoke(app, ["div", "10", "0"])
-    assert r.exit_code != 0
-    # Typer/Click puts the message in stdout/stderr depending on config;
-    # this keeps the assertion robust.
-    assert "divide" in (r.stdout + r.stderr).lower()
+    assert r.exit_code == 2
+    assert "divide by zero" in (r.stdout + r.stderr).lower()
 
 
 def run_cli(*args: str):
