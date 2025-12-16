@@ -5,8 +5,8 @@ from .calculator import add_numbers, subtract, multiply, divide
 app = typer.Typer(no_args_is_help=True)
 
 
-@app.command("add")
-def add_cmd(a: float, b: float) -> None:
+@app.command()
+def add(a: float, b: float) -> None:
     typer.echo(add_numbers(a, b))
 
 
