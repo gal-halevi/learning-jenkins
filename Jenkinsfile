@@ -47,14 +47,18 @@ pipeline {
                                     echo "Running ruff + mypy + coverage (only on Python ${PYTHON_VERSION})"
                                     python -m ruff check . --output-format junit --output-file reports/ruff-${PYTHON_VERSION}.xml
                                     python -m mypy calculator
+
+                                    # Override coverage gating during pytest so reports are published;
+                                    # enforce fail_under via `coverage report` (from .coveragerc) after.
                                     python -m pytest \\
                                         --junitxml=reports/pytest-${PYTHON_VERSION}.xml \\
                                         --junit-prefix=py${PYTHON_VERSION} \\
                                         -o junit_suite_name=pytest-py${PYTHON_VERSION} \\
                                         --cov \\
                                         --cov-report=xml:reports/coverage.xml \\
-                                        --cov-fail-under=85 \\
+                                        --cov-fail-under=0 \\
                                         -v tests/
+                                    python -m coverage report --show-missing
                                 else
                                     echo "Running pytest only (Python ${PYTHON_VERSION})"
                                     python -m pytest \\
@@ -70,6 +74,8 @@ pipeline {
                 post {
                     always {
                         junit "reports/pytest-${PYTHON_VERSION}.xml"
+                        archiveArtifacts artifacts: 'reports/**', allowEmptyArchive: true, fingerprint: true
+
                         script {
                             if (env.PYTHON_VERSION == '3.12') {
                                 junit "reports/ruff-${PYTHON_VERSION}.xml"
