@@ -41,6 +41,8 @@ pipeline {
                             sh """
                                 set -eu
                                 mkdir -p reports
+                                python -m venv .venv
+                                . .venv/bin/activate
                                 python -m pip install -U pip
                                 python -m pip install -r requirements-dev.txt
                                 if [ "${PYTHON_VERSION}" = "3.12" ]; then
