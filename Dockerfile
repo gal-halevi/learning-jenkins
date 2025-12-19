@@ -2,6 +2,12 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get update && \
+    apt-get install -y --no-install-recommends curl jq && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt .
 
 RUN python -m venv /opt/venv
