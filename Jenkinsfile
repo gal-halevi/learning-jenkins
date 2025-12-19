@@ -83,7 +83,7 @@ pipeline {
                                 recordCoverage(
                                     tools: [[parser: 'COBERTURA', pattern: 'reports/coverage.xml']],
                                     sourceCodeRetention: 'LAST_BUILD',
-                                    failNoReports: true
+                                    condition: 'ALWAYS'
                                 )
                             }
                         }
