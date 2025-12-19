@@ -99,6 +99,11 @@ pipeline {
             //     branch 'main'
             // }
             agent { label 'docker' }
+
+            environment {
+                CACHE_REF = "${DOCKER_IMAGE}:buildcache"
+            }
+
             steps {
                 checkout scm
 
@@ -108,20 +113,33 @@ pipeline {
                     def latestTag = 'latest'
 
                     def imageRef = "${env.DOCKER_IMAGE}:${shaTag}"
-                    def img = docker.build(imageRef)
 
-                    sh """
-                        set -eu
-                        out=\$(docker run --rm ${imageRef} add 2 3)
-                        echo "\$out"
-                        echo "\$out" | grep -F "5.0"
-                    """
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DH_USER', passwordVariable: 'DH_TOKEN')]) {
+                        sh """
+                            set -eux
 
-                    docker.withRegistry('', 'dockerhub-creds') {
-                        img.push(shaTag)
-                        img.push(branchBuild)
-                        img.push(latestTag)
-                    }    
+                            echo "\$DH_TOKEN" | docker login -u "\$DH_USER" --password-stdin
+                            
+                            # Ensure we have a buildx builder on THIS node/daemon
+                            docker buildx create --name jx --driver docker-container --use 2>/dev/null || docker buildx use jx
+                            docker buildx inspect --bootstrap
+
+                            # Build + push image, while importing/exporting cache via registry
+                            docker buildx build \\
+                                --pull \\
+                                --cache-from type=registry,ref=${env.CACHE_REF} \\
+                                --cache-to   type=registry,ref=${env.CACHE_REF},mode=max \\
+                                -t ${env.DOCKER_IMAGE}:${shaTag} \\
+                                -t ${env.DOCKER_IMAGE}:${branchBuild} \\
+                                -t ${env.DOCKER_IMAGE}:${latestTag} \\
+                                --push \\
+                                .
+                            
+                            out=\$(docker run --rm ${imageRef} add 2 3)
+                            echo "\$out"
+                            echo "\$out" | grep -F "5.0"
+                        """
+                    }
                 }
             }
         }
