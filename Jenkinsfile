@@ -117,7 +117,7 @@ pipeline {
 
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DH_USER', passwordVariable: 'DH_TOKEN')]) {
                         sh """
-                            set -eux
+                            set -eu
 
                             echo "\$DH_TOKEN" | docker login -u "\$DH_USER" --password-stdin
                             
