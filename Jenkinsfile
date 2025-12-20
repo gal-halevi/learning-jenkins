@@ -38,7 +38,7 @@ pipeline {
 
                     stage('Run Tests') {
                         steps {
-                            sh """
+                            sh '''
                                 set -eu
                                 mkdir -p reports
                                 export PIP_CACHE_DIR="$PWD/.pip-cache"
@@ -55,24 +55,24 @@ pipeline {
 
                                     # Override coverage gating during pytest so reports are published;
                                     # enforce fail_under via `coverage report` (from .coveragerc) after.
-                                    python -m pytest \\
-                                        --junitxml=reports/pytest-${PYTHON_VERSION}.xml \\
-                                        --junit-prefix=py${PYTHON_VERSION} \\
-                                        -o junit_suite_name=pytest-py${PYTHON_VERSION} \\
-                                        --cov \\
-                                        --cov-report=xml:reports/coverage.xml \\
-                                        --cov-fail-under=0 \\
+                                    python -m pytest \
+                                        --junitxml=reports/pytest-${PYTHON_VERSION}.xml \
+                                        --junit-prefix=py${PYTHON_VERSION} \
+                                        -o junit_suite_name=pytest-py${PYTHON_VERSION} \
+                                        --cov \
+                                        --cov-report=xml:reports/coverage.xml \
+                                        --cov-fail-under=0 \
                                         -v tests/
                                     python -m coverage report --show-missing
                                 else
                                     echo "Running pytest only (Python ${PYTHON_VERSION})"
-                                    python -m pytest \\
-                                    --junitxml=reports/pytest-${PYTHON_VERSION}.xml \\
-                                    --junit-prefix=py${PYTHON_VERSION} \\
-                                    -o junit_suite_name=pytest-py${PYTHON_VERSION} \\
+                                    python -m pytest \
+                                    --junitxml=reports/pytest-${PYTHON_VERSION}.xml \
+                                    --junit-prefix=py${PYTHON_VERSION} \
+                                    -o junit_suite_name=pytest-py${PYTHON_VERSION} \
                                     -v tests/
                                 fi
-                            """
+                            '''
                         }
                     }
                 }
