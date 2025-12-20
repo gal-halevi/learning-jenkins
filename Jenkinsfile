@@ -79,7 +79,7 @@ pipeline {
                 post {
                     always {
                         junit "reports/pytest-${PYTHON_VERSION}.xml"
-                        archiveArtifacts artifacts: 'reports/**', allowEmptyArchive: true, fingerprint: true
+                        archiveArtifacts artifacts: 'reports/**', allowEmptyArchive: false, fingerprint: true
 
                         script {
                             if (env.PYTHON_VERSION == '3.12') {
