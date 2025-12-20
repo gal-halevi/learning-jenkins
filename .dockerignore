@@ -1,12 +1,26 @@
-.git/
-.venv/
+# VCS
+.git
+.gitignore
+
+# Python bytecode / caches
 __pycache__/
-*.pyc
+*.py[cod]
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-reports/
-htmlcov/
 .coverage
-dist/
-build/
+coverage/
+htmlcov
+
+# Virtualenvs
+.venv*/
+
+# Pip cache
+.pip-cache/
+
+# Test/output artifacts
+reports/
+*.xml
+
+# Jenkins workspace byproducts
+coverage-sources.zip
