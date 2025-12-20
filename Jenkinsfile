@@ -138,6 +138,7 @@ pipeline {
                                 --push \\
                                 .
                             
+                            docker pull ${imageRef}
                             out=\$(docker run --rm ${imageRef} add 2 3)
                             echo "\$out"
                             echo "\$out" | grep -F "5.0"
