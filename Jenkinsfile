@@ -43,8 +43,9 @@ pipeline {
                                 mkdir -p reports
                                 export PIP_CACHE_DIR="$PWD/.pip-cache"
                                 mkdir -p "$PIP_CACHE_DIR"
-                                python -m venv .venv
-                                . .venv/bin/activate
+                                rm -rf .venv-${PYTHON_VERSION}
+                                python -m venv .venv-${PYTHON_VERSION}
+                                . .venv-${PYTHON_VERSION}/bin/activate
                                 python -m pip install -U pip
                                 python -m pip install -r requirements-dev.txt
                                 if [ "${PYTHON_VERSION}" = "3.12" ]; then
