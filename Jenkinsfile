@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'galhalevi/calculator'
-        PIP_CACHE_DIR = "${WORKSPACE}/.pip-cache"
         PIP_DISABLE_PIP_VERSION_CHECK=1
     }
 
@@ -41,6 +40,8 @@ pipeline {
                             sh """
                                 set -eu
                                 mkdir -p reports
+                                export PIP_CACHE_DIR="$PWD/.pip-cache"
+                                mkdir -p "$PIP_CACHE_DIR"
                                 python -m venv .venv
                                 . .venv/bin/activate
                                 python -m pip install -U pip
