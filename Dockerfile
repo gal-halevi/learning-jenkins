@@ -14,7 +14,7 @@ RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 RUN --mount=type=cache,target=/root/.cache/pip \
-    python -m pip install --no-cache-dir -r requirements.txt
+    python -m pip install -r requirements.txt
 
 RUN useradd -m -u 10001 appuser
 USER appuser
