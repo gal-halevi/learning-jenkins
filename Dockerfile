@@ -17,8 +17,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     python -m pip install -r requirements.txt
 
 RUN useradd -m -u 10001 appuser
+COPY --chown=appuser:appuser calculator/ calculator/
 USER appuser
-
-COPY calculator/ calculator/
 
 ENTRYPOINT ["python", "-m", "calculator"]
