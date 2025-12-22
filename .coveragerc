@@ -2,7 +2,7 @@
 source = calculator
 
 [report]
-exclude_lines =
-    if __name__ == .__main__.:
+omit =
+    calculator/__main__.py
 
 fail_under = 85
